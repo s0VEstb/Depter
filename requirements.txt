@@ -6,3 +6,10 @@ asyncpg
 alembic
 structlog
 greenlet
+pdfplumber
+PyMuPDF
+openai
+google-generativeai
+python-multipart
+aiofiles
+numpy
