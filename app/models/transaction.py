@@ -23,5 +23,7 @@ class Transaction(Base):
     is_duplicate = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    recipient_phone = Column(String(20), nullable=True)
+    external_id = Column(String(50), nullable=True)  # UUID из PDF
 
     user = relationship("User", back_populates="transactions")
