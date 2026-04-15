@@ -1,7 +1,5 @@
 from app.db.base import Base
-from app.models.user import User
-from app.models.transaction import Transaction
-from app.models.profile import Profile
-from app.models.fraud import FraudFlag
-
-__all__ = ["Base", "User", "Transaction", "Profile", "FraudFlag"]
+from .user import User
+from .transaction import Transaction
+from profile import Profile
+from .fraud import FraudFlag
