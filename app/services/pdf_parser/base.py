@@ -14,6 +14,71 @@ PARSERS = {
     "simbank": parse_simbank,
 }
 
+
+def _safe_parse_with_source(source: str, pdf_bytes: bytes) -> ParsedStatement:
+    """Безопасный вызов парсера с единообразной обработкой исключений."""
+    parser_fn = PARSERS[source]
+    try:
+        result = parser_fn(pdf_bytes)
+        # На случай если конкретный парсер не проставил source.
+        result.source = result.source or source
+        return result
+    except Exception as e:
+        logger.exception("Ошибка парсинга %s: %s", source, e)
+        return ParsedStatement(
+            source=source,
+            client_name="",
+            inn=None,
+            account_number=None,
+            period_start=None,
+            period_end=None,
+            opening_balance=0,
+            closing_balance=0,
+            total_income=0,
+            total_expense=0,
+            parse_errors=[str(e)],
+        )
+
+
+def _pick_best_parse_result(pdf_bytes: bytes, preferred_source: str | None = None) -> ParsedStatement:
+    """
+    Пробует парсеры и выбирает лучший результат по количеству транзакций.
+    Это спасает кейсы, когда auto-detect банка промахнулся.
+    """
+    candidates: list[str] = []
+    if preferred_source in PARSERS:
+        candidates.append(preferred_source)
+    candidates.extend([src for src in PARSERS if src != preferred_source])
+
+    best: ParsedStatement | None = None
+    for src in candidates:
+        result = _safe_parse_with_source(src, pdf_bytes)
+
+        # Если приоритетный парсер успешно достал транзакции — берём сразу.
+        if src == preferred_source and result.transactions:
+            return result
+
+        if best is None:
+            best = result
+            continue
+
+        if len(result.transactions) > len(best.transactions):
+            best = result
+
+    return best if best is not None else ParsedStatement(
+        source=preferred_source or "other",
+        client_name="",
+        inn=None,
+        account_number=None,
+        period_start=None,
+        period_end=None,
+        opening_balance=0,
+        closing_balance=0,
+        total_income=0,
+        total_expense=0,
+        parse_errors=["Не удалось распарсить выписку ни одним доступным парсером"],
+    )
+
  
 def parse_statement(pdf_bytes: bytes, hint_source: str | None = None) -> ParsedStatement:
     """
@@ -28,36 +93,21 @@ def parse_statement(pdf_bytes: bytes, hint_source: str | None = None) -> ParsedS
             print(tx.txn_date, tx.direction, tx.amount, tx.description)
     """
     source = hint_source or detect_bank(pdf_bytes)
- 
-    parser_fn = PARSERS.get(source)
-    if parser_fn is None:
-        logger.error(f"Нет парсера для источника: {source}")
-        return ParsedStatement(
-            source=source,
-            client_name="", inn=None, account_number=None,
-            period_start=None, period_end=None,
-            opening_balance=0, closing_balance=0,
-            total_income=0, total_expense=0,
-            parse_errors=[f"Unsupported bank: {source}"]
-        )
- 
-    try:
-        result = parser_fn(pdf_bytes)
-        logger.info(
-            f"[{source.upper()}] Спарсено {len(result.transactions)} транзакций | "
-            f"Клиент: {result.client_name}"
-        )
-        return result
-    except Exception as e:
-        logger.exception(f"Ошибка парсинга {source}: {e}")
-        return ParsedStatement(
-            source=source,
-            client_name="", inn=None, account_number=None,
-            period_start=None, period_end=None,
-            opening_balance=0, closing_balance=0,
-            total_income=0, total_expense=0,
-            parse_errors=[str(e)]
-        )
+
+    if source not in PARSERS:
+        logger.warning("Источник '%s' не распознан точно. Пробуем все доступные парсеры.", source)
+        result = _pick_best_parse_result(pdf_bytes)
+    else:
+        result = _pick_best_parse_result(pdf_bytes, preferred_source=source)
+
+    logger.info(
+        "[%s] Спарсено %s транзакций | Клиент: %s | Ошибки: %s",
+        (result.source or source or "other").upper(),
+        len(result.transactions),
+        result.client_name,
+        len(result.parse_errors),
+    )
+    return result
  
  
 # ──────────────────────────────────────────────

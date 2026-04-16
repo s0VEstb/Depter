@@ -29,6 +29,7 @@ class ScoringProfileResponse(BaseModel):
     """Полный скоринговый профиль для API-ответа."""
     profile_id: int
     user_id: Optional[int] = None
+    avg_income_monthly: float
     avg_income_3m: float
     avg_income_6m: float
     stability: float

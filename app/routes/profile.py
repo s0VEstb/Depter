@@ -43,13 +43,16 @@ async def get_profile(
     # Извлекаем список источников
     sources = list(income_by_source.keys()) if income_by_source else []
 
-    # Рассчитываем avg_income_3m (упрощённо — из среднего за 6 месяцев)
-    avg_income_6m = profile.avg_monthly_income_kgs or 0.0
-    avg_income_3m = avg_income_6m  # В MVP совпадает
+    # По бизнес-требованию отдаём средний доход в месяц напрямую из БД.
+    avg_income_monthly = float(profile.avg_monthly_income_kgs or 0.0)
+    # Сохраняем совместимость контракта API: старые поля дублируют monthly value.
+    avg_income_3m = avg_income_monthly
+    avg_income_6m = avg_income_monthly
 
     return ScoringProfileResponse(
         profile_id=profile.id,
         user_id=profile.user_id,
+        avg_income_monthly=avg_income_monthly,
         avg_income_3m=avg_income_3m,
         avg_income_6m=avg_income_6m,
         stability=profile.income_stability_score or 0.0,

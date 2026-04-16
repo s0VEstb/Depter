@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 import os
 
 
@@ -21,6 +22,19 @@ class Settings(BaseSettings):
     # Ограничения на загрузку
     MAX_UPLOAD_SIZE_MB: int = 20
     MAX_FILES_PER_UPLOAD: int = 3
+
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug(cls, value):
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"1", "true", "yes", "on", "debug", "dev"}:
+                return True
+            if normalized in {"0", "false", "no", "off", "release", "prod", "production"}:
+                return False
+        return value
 
     @property
     def DATABASE_URL(self) -> str:

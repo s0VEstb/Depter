@@ -1,7 +1,7 @@
-from datetime import date, datetime
+from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class UserCreate(BaseModel):
@@ -16,6 +16,14 @@ class UserCreate(BaseModel):
     occupation: str  # значение из OccupationEnum
     consent_given_at: datetime
     consent_version: str = Field(..., max_length=20)
+
+    @field_validator("birth_date", "consent_given_at", mode="after")
+    @classmethod
+    def normalize_to_naive_utc(cls, value: datetime) -> datetime:
+        """Приводим aware datetime к UTC и убираем tzinfo для TIMESTAMP WITHOUT TIME ZONE."""
+        if value.tzinfo is None:
+            return value
+        return value.astimezone(timezone.utc).replace(tzinfo=None)
 
 
 class UserOut(BaseModel):
