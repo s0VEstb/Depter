@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import UploadPage from './pages/UploadPage';
 import ProgressPage from './pages/ProgressPage';
 import ResultPage from './pages/ResultPage';
+import ProfilePage from './pages/ProfilePage';
 
 /**
  * App — Layout + маршруты
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/progress/:jobId" element={<ProgressPage />} />
         <Route path="/result/:profileId" element={<ResultPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </>
   );

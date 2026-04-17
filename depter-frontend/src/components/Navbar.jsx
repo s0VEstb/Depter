@@ -48,7 +48,7 @@ export default function Navbar() {
                             <span className="nav-username">👤 {user.full_name}</span>
                             <button
                                 className="btn btn-secondary btn-sm"
-                                onClick={() => navigate('/upload')}
+                                onClick={() => navigate('/profile')}
                             >
                                 Профиль
                             </button>

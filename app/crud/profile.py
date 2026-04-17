@@ -40,3 +40,13 @@ async def get_profile_by_user(db: AsyncSession, user_id: int) -> Optional[Profil
         .limit(1)
     )
     return result.scalar_one_or_none()
+
+
+async def get_profiles_by_user(db: AsyncSession, user_id: int) -> list[Profile]:
+    """Получить все профили пользователя (все скоринги), новые первыми."""
+    result = await db.execute(
+        select(Profile)
+        .where(Profile.user_id == user_id)
+        .order_by(Profile.created_at.desc())
+    )
+    return list(result.scalars().all())

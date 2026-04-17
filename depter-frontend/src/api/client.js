@@ -74,4 +74,13 @@ export async function loginUser(email, password) {
     return response.data;
 }
 
+/**
+ * История скоринговых профилей пользователя
+ * GET /api/users/{user_id}/profiles
+ */
+export async function getUserProfiles(userId) {
+    const response = await api.get(`/api/users/${userId}/profiles`);
+    return response.data;
+}
+
 export default api;

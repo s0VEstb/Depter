@@ -478,3 +478,86 @@ h4 {
     font-size: 1rem;
   }
 }
+
+/* ──── Стили печати / PDF-экспорт ──── */
+@media print {
+
+  /* Скрываем ненужные элементы */
+  .navbar,
+  .action-buttons,
+  .btn,
+  .score-label+button,
+  .nav-auth {
+    display: none !important;
+  }
+
+  /* Убираем фоновый цвет/gradient с body */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Убираем padding-top от navbar */
+  .page {
+    padding-top: 0 !important;
+  }
+
+  .result-page {
+    padding: 12px 0 !important;
+  }
+
+  /* Текст на белом фоне */
+  .glass-card {
+    background: #f9f9f9 !important;
+    border: 1px solid #ddd !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  .gradient-text {
+    -webkit-text-fill-color: #000 !important;
+    background: none !important;
+    color: #000 !important;
+  }
+
+  /* Скрыть URL браузера в хедере/футере (работает в Chrome) */
+  @page {
+    margin: 12mm;
+  }
+
+  /* Анимации не нужны при печати */
+  * {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+  }
+
+  /* Tooltip-иконки — убрать */
+  .tooltip-icon,
+  .tooltip-bubble {
+    display: none !important;
+  }
+
+  /* Графики — принудительно белый фон */
+  svg {
+    background: transparent !important;
+  }
+
+  /* Текст графиков */
+  svg text {
+    fill: #333 !important;
+  }
+
+  /* Заголовок страницы печати */
+  .result-page::before {
+    content: 'Depter — Отчёт по кредитному скорингу';
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #00BCD4;
+  }
+}

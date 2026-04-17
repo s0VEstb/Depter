@@ -57,6 +57,13 @@ export default function ResultPage() {
         const fetchProfile = async () => {
             try {
                 const data = await getProfile(profileId);
+                // Проверка владельца: профиль должен принадлежать текущему пользователю
+                const stored = localStorage.getItem('depter_user');
+                const currentUser = stored ? JSON.parse(stored) : null;
+                if (data.user_id && currentUser && data.user_id !== currentUser.id) {
+                    setError('Вы не можете просматривать чужой отчёт.');
+                    return;
+                }
                 setProfile(data);
             } catch (err) {
                 setError(err.response?.data?.detail || 'Не удалось загрузить профиль');
