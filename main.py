@@ -6,7 +6,7 @@ import logging.config
 
 from config import settings
 from app.utils.logging import LOGGING_CONFIG
-from app.routes import upload, status, profile, users
+from app.routes import upload, status, profile, users, auth
 
 logging.config.dictConfig(LOGGING_CONFIG)
 
@@ -41,6 +41,7 @@ def create_app() -> FastAPI:
     app.include_router(status.router, prefix="/api", tags=["status"])
     app.include_router(profile.router, prefix="/api", tags=["profile"])
     app.include_router(users.router, prefix="/api", tags=["users"])
+    app.include_router(auth.router, prefix="/api", tags=["auth"])
 
     return app
 

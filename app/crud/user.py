@@ -1,3 +1,4 @@
+import hashlib
 import logging
 from typing import Optional
 
@@ -26,6 +27,9 @@ async def create_user(db: AsyncSession, data: UserCreate) -> User:
         consent_given_at=data.consent_given_at,
         consent_version=data.consent_version,
     )
+    if data.password:
+        # Простое SHA-256 хеширование (для MVP/хакатона — достаточно)
+        user.password_hash = hashlib.sha256(data.password.encode()).hexdigest()
     db.add(user)
     await db.commit()
     await db.refresh(user)
@@ -42,4 +46,10 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> Optional[User]:
 async def get_user_by_phone(db: AsyncSession, phone: str) -> Optional[User]:
     """Найти пользователя по номеру телефона."""
     result = await db.execute(select(User).where(User.phone == phone))
+    return result.scalar_one_or_none()
+
+
+async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
+    """Найти пользователя по email."""
+    result = await db.execute(select(User).where(User.email == email))
     return result.scalar_one_or_none()

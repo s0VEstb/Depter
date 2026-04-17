@@ -57,6 +57,66 @@ def _income_transactions(transactions: list[dict[str, Any]]) -> list[dict[str, A
     return [tx for tx in transactions if tx["direction"] == "in" and tx["amount_kgs"] > 0]
 
 
+def _expense_transactions(transactions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [tx for tx in transactions if tx["direction"] == "out" and tx["amount_kgs"] > 0]
+
+
+def _total_income(transactions: list[dict[str, Any]]) -> float:
+    return round(sum(tx["amount_kgs"] for tx in _income_transactions(transactions)), 2)
+
+
+def _total_expense(transactions: list[dict[str, Any]]) -> float:
+    return round(sum(tx["amount_kgs"] for tx in _expense_transactions(transactions)), 2)
+
+
+def _monthly_expense_map(transactions: list[dict[str, Any]]) -> dict[str, float]:
+    monthly: dict[str, float] = defaultdict(float)
+    for tx in _expense_transactions(transactions):
+        monthly[_month_key(tx["txn_date"])] += tx["amount_kgs"]
+    return dict(sorted(monthly.items()))
+
+
+def _overdraft_analysis(transactions: list[dict[str, Any]]) -> tuple[int, float]:
+    """Simulate running balance to find overdraft count and max overdraft.
+    Returns (overdraft_count, max_overdraft_amount).
+    """
+    balance = 0.0
+    overdraft_count = 0
+    max_overdraft = 0.0
+    was_negative = False
+
+    for tx in transactions:  # already sorted by date
+        if tx["direction"] == "in":
+            balance += tx["amount_kgs"]
+        else:
+            balance -= tx["amount_kgs"]
+
+        if balance < 0:
+            if not was_negative:
+                overdraft_count += 1
+                was_negative = True
+            if balance < max_overdraft:
+                max_overdraft = balance
+        else:
+            was_negative = False
+
+    return overdraft_count, round(abs(max_overdraft), 2)
+
+
+def _income_anomaly_detected(monthly_income: dict[str, float]) -> bool:
+    """True if any month deviates >80% from the average."""
+    values = list(monthly_income.values())
+    if len(values) < 2:
+        return False
+    avg = mean(values)
+    if avg <= 0:
+        return False
+    for v in values:
+        if abs(v - avg) / avg > 0.8:
+            return True
+    return False
+
+
 def _monthly_income_map(transactions: list[dict[str, Any]]) -> dict[str, float]:
     monthly: dict[str, float] = defaultdict(float)
 
@@ -181,6 +241,24 @@ def calculate_fallback_metrics(transactions: list[Any]) -> dict[str, Any]:
         sources_count=sources_count,
     )
 
+    # ── Расчёт расходов и овердрафтов (детерминированный) ──
+    total_in = _total_income(active_transactions)
+    total_out = _total_expense(active_transactions)
+    months = max(data_period_months, 1)
+    avg_exp_monthly = round(total_out / months, 2)
+    ei_ratio = round(total_out / total_in, 3) if total_in > 0 else 0.0
+    net_cf = round((total_in - total_out) / months, 2)
+    od_count, od_max = _overdraft_analysis(active_transactions)
+    anomaly = _income_anomaly_detected(monthly_income)
+
+    # Подкомпоненты скоринга (для отображения на фронте)
+    income_score = min(avg_income_3m / 1000, 100) * 5
+    stability_score = round(stability * 350, 1)
+    history_score = round(min(data_period_months, 12) / 12 * 100, 1)
+    source_score = round(min(sources_count, 3) / 3 * 50, 1)
+    trend_score = round(_clamp(trend * 100, -50, 50), 1)
+    fraud_penalty = 0
+
     result = {
         "avg_income_3m": avg_income_3m,
         "avg_income_6m": avg_income_6m,
@@ -190,11 +268,27 @@ def calculate_fallback_metrics(transactions: list[Any]) -> dict[str, Any]:
         "recommended_limit": recommended_limit,
         "sources_count": sources_count,
         "data_period_months": data_period_months,
+        "fraud_risk_score": fraud_penalty,
         "income_by_source": _income_by_source(active_transactions),
         "income_by_category": _income_by_category(active_transactions),
+        # Точные финансовые метрики (math, не LLM)
+        "total_income": total_in,
+        "total_expense": total_out,
+        "avg_expense_monthly": avg_exp_monthly,
+        "expense_to_income_ratio": ei_ratio,
+        "net_cashflow_monthly": net_cf,
+        "overdraft_count": od_count,
+        "max_overdraft_amount": od_max,
+        "income_anomaly_detected": anomaly,
         "score_components": {
             "fallback": True,
             "monthly_income": monthly_income,
+            "stability_score": stability_score,
+            "trend_score": trend_score,
+            "fraud_penalty": fraud_penalty,
+            "income_score": round(income_score, 1),
+            "history_score": history_score,
+            "source_score": source_score,
         },
     }
 

@@ -13,7 +13,7 @@ logger = logging.getLogger("depter")
 async def create_profile(db: AsyncSession, data: dict) -> Profile:
     """Создать скоринговый профиль."""
     # JSON-поля сериализуем в строку для Text-колонок
-    for json_field in ("income_by_source", "income_by_category", "score_components"):
+    for json_field in ("income_by_source", "income_by_category", "score_components", "ai_verdict"):
         if json_field in data and isinstance(data[json_field], dict):
             data[json_field] = json.dumps(data[json_field], ensure_ascii=False)
 

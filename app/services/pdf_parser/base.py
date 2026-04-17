@@ -43,7 +43,7 @@ def _safe_parse_with_source(source: str, pdf_bytes: bytes) -> ParsedStatement:
 def _pick_best_parse_result(pdf_bytes: bytes, preferred_source: str | None = None) -> ParsedStatement:
     """
     Пробует парсеры и выбирает лучший результат по количеству транзакций.
-    Это спасает кейсы, когда auto-detect банка промахнулся.
+    Если preferred_source нашёл транзакции — возвращаем сразу, НЕ пробуем другие.
     """
     candidates: list[str] = []
     if preferred_source in PARSERS:
@@ -54,15 +54,27 @@ def _pick_best_parse_result(pdf_bytes: bytes, preferred_source: str | None = Non
     for src in candidates:
         result = _safe_parse_with_source(src, pdf_bytes)
 
-        # Если приоритетный парсер успешно достал транзакции — берём сразу.
+        # ИЗМЕНЕНИЕ: если preferred_source нашёл транзакции — сразу возвращаем,
+        # НЕ пробуем другие парсеры
         if src == preferred_source and result.transactions:
+            logger.info(
+                "[%s] preferred parser found %d transactions — using it",
+                src.upper(), len(result.transactions)
+            )
             return result
 
-        if best is None:
+        # Если preferred_source не нашёл транзакций — продолжаем
+        if src == preferred_source and not result.transactions:
+            logger.warning(
+                "[%s] preferred parser found 0 transactions — trying other parsers",
+                src.upper()
+            )
             best = result
             continue
 
-        if len(result.transactions) > len(best.transactions):
+        if best is None:
+            best = result
+        elif len(result.transactions) > len(best.transactions):
             best = result
 
     return best if best is not None else ParsedStatement(

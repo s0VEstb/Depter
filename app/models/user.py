@@ -21,6 +21,7 @@ class User(Base):
     occupation = Column(SAEnum(OccupationEnum), nullable=False)
     consent_given_at = Column(DateTime, nullable=False)
     consent_version = Column(String(20), nullable=False)
+    password_hash = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

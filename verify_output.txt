@@ -1,0 +1,20 @@
+Parsed 74 transactions from simbank
+
+=== MATH-BASED METRICS ===
+  total_income: 21326.49
+  total_expense: 21676.2
+  avg_expense_monthly: 7225.4
+  expense_to_income_ratio: 1.016
+  net_cashflow_monthly: -116.57
+  overdraft_count: 10
+  max_overdraft_amount: 928.32
+  income_anomaly_detected: True
+
+=== COMPARISON ===
+  total_income: actual=21326.49, expected=21326.49 [OK]
+  total_expense: actual=21676.2, expected=21676.2 [OK]
+  avg_expense_monthly: actual=7225.4, expected=7225.4 [OK]
+  expense_to_income_ratio: actual=1.016, expected=1.016 [OK]
+  net_cashflow_monthly: actual=-116.57, expected=-116.57 [OK]
+  overdraft_count: 10 (should be >=3)
+  income_anomaly: True (should be True)

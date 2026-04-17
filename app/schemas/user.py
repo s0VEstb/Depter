@@ -16,6 +16,8 @@ class UserCreate(BaseModel):
     occupation: str  # значение из OccupationEnum
     consent_given_at: datetime
     consent_version: str = Field(..., max_length=20)
+    password: Optional[str] = Field(None, min_length=6, max_length=128,
+                                    description="Пароль (мин. 6 символов)")
 
     @field_validator("birth_date", "consent_given_at", mode="after")
     @classmethod

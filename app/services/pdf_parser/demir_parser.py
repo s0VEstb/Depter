@@ -131,7 +131,11 @@ def parse_demir(pdf_bytes: bytes) -> ParsedStatement:
         row_start = 1
         if col_date == -1 or col_amount == -1:
             # На следующих страницах у Demir строки часто идут без заголовка.
-            # Тогда используем зафиксированные индексы колонок.
+            # Используем зафиксированные индексы колонок ТОЛЬКО если таблица
+            # имеет достаточно колонок (Demir = 9 колонок, минимум 7).
+            # Это предотвращает ложный парсинг таблиц других банков.
+            if len(table[0]) < 7:
+                continue
             col_date = DEMIR_CONTINUATION_COLUMNS["col_date"]
             col_type = DEMIR_CONTINUATION_COLUMNS["col_type"]
             col_payer = DEMIR_CONTINUATION_COLUMNS["col_payer"]

@@ -1,0 +1,480 @@
+/* ======================================
+   Depter — Global Styles
+   mBank Hackathon 2026
+   ====================================== */
+
+/* Google Fonts — Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+/* ──── CSS-переменные (тема) ──── */
+:root {
+  /* Бренд mBank */
+  --color-cyan: #00BCD4;
+  --color-yellow: #FFD600;
+  --color-gradient: linear-gradient(135deg, #00BCD4, #FFD600);
+  --color-grey: #8C8C8C;
+
+  /* Тёмная тема */
+  --color-bg: #000000;
+  --color-surface: #111111;
+  --color-surface-alt: #0D0D0D;
+  --color-text: #FEFEFE;
+  --color-text-secondary: #8C8C8C;
+
+  /* Borders */
+  --border-cyan: rgba(0, 188, 212, 0.15);
+  --border-cyan-hover: rgba(0, 188, 212, 0.4);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(17, 17, 17, 0.7);
+  --glass-border: rgba(0, 188, 212, 0.2);
+  --glass-blur: blur(12px);
+
+  /* Glow Effects */
+  --glow-cyan: 0 0 20px rgba(0, 188, 212, 0.3);
+  --glow-cyan-strong: 0 0 40px rgba(0, 188, 212, 0.5);
+  --glow-yellow: 0 0 20px rgba(255, 214, 0, 0.3);
+
+  /* Скругления */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Типографика */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-light: 300;
+  --font-regular: 400;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  /* Цвета статусов */
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-error: #F44336;
+  --color-info: #2196F3;
+}
+
+/* ──── CSS Reset ──── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  font-weight: var(--font-regular);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--color-cyan);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-yellow);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: var(--font-family);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input,
+select,
+textarea {
+  font-family: var(--font-family);
+  outline: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* ──── Типографика ──── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--font-bold);
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+/* ──── Утилиты ──── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.gradient-text {
+  background: var(--color-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: var(--spacing-xl);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.glass-card:hover {
+  border-color: var(--border-cyan-hover);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ──── Кнопки ──── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: 14px 32px;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-semibold);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--color-gradient);
+  color: #000;
+  border: none;
+}
+
+.btn-primary:hover {
+  box-shadow: var(--glow-cyan-strong);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-cyan);
+  border: 1px solid var(--color-cyan);
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 188, 212, 0.1);
+  box-shadow: var(--glow-cyan);
+}
+
+.btn-lg {
+  padding: 18px 48px;
+  font-size: 1.1rem;
+  border-radius: var(--radius-lg);
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(140, 140, 140, 0.4);
+  color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
+}
+
+/* ──── Navbar Auth ──── */
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-username {
+  font-size: 0.85rem;
+  color: var(--color-cyan);
+  font-weight: 600;
+}
+
+/* ──── Формы ──── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.form-input,
+.form-select {
+  padding: 14px 16px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--border-cyan);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--color-grey);
+}
+
+.form-input.error,
+.form-select.error {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: var(--color-error);
+  min-height: 1.2em;
+}
+
+/* ──── Badge ──── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.03em;
+}
+
+.badge-cyan {
+  background: rgba(0, 188, 212, 0.15);
+  color: var(--color-cyan);
+}
+
+.badge-yellow {
+  background: rgba(255, 214, 0, 0.15);
+  color: var(--color-yellow);
+}
+
+.badge-green {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--color-success);
+}
+
+.badge-red {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--color-error);
+}
+
+/* ──── Анимации ──── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Задержки анимации */
+.delay-1 {
+  animation-delay: 0.1s;
+}
+
+.delay-2 {
+  animation-delay: 0.2s;
+}
+
+.delay-3 {
+  animation-delay: 0.3s;
+}
+
+.delay-4 {
+  animation-delay: 0.4s;
+}
+
+.delay-5 {
+  animation-delay: 0.5s;
+}
+
+/* ──── Скроллбар ──── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-grey);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-cyan);
+}
+
+/* ──── Responsive ──── */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .btn-lg {
+    padding: 14px 32px;
+    font-size: 1rem;
+  }
+}

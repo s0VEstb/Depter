@@ -18,6 +18,15 @@ class ProfileOut(BaseModel):
     recommended_limit: Optional[float] = None
     fraud_risk_score: Optional[int] = None
     score_components: Optional[Dict[str, Any]] = None
+    total_income: Optional[float] = None
+    total_expense: Optional[float] = None
+    avg_expense_monthly: Optional[float] = None
+    expense_to_income_ratio: Optional[float] = None
+    net_cashflow_monthly: Optional[float] = None
+    overdraft_count: Optional[int] = None
+    max_overdraft_amount: Optional[float] = None
+    income_anomaly_detected: Optional[bool] = None
+    ai_verdict: Optional[Dict[str, Any]] = None
     calculated_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -43,4 +52,14 @@ class ScoringProfileResponse(BaseModel):
     income_by_category: Dict[str, Any]
     fraud_risk_score: int
     score_components: Dict[str, Any]
+    # Новые финансовые метрики
+    total_income: Optional[float] = None
+    total_expense: Optional[float] = None
+    avg_expense_monthly: Optional[float] = None
+    expense_to_income_ratio: Optional[float] = None
+    net_cashflow_monthly: Optional[float] = None
+    overdraft_count: Optional[int] = None
+    max_overdraft_amount: Optional[float] = None
+    income_anomaly_detected: Optional[bool] = None
+    ai_verdict: Optional[Dict[str, Any]] = None
     calculated_at: datetime

@@ -83,13 +83,21 @@ def parse_simbank(pdf_bytes: bytes) -> ParsedStatement:
         col_date = col_detail = col_amount = -1
  
         for idx, h in enumerate(header):
-            hl = h.lower()
-            if "дата" in hl and col_date == -1:
+            hl = h.lower().replace("\n", " ").strip()
+            if ("дата" in hl or "date" in hl) and col_date == -1:
                 col_date = idx
-            if "детал" in hl or "описани" in hl or "operation" in hl:
+            if any(kw in hl for kw in [
+                "детал", "описани", "operation", "операци",
+                "назначени", "наименовани", "сведени", "комментар", "инфо"
+            ]):
                 col_detail = idx
-            if "сумма" in hl and "баланс" not in hl and "плата" not in hl:
+            if ("сумма" in hl or "amount" in hl) and "баланс" not in hl and "плата" not in hl and col_amount == -1:
                 col_amount = idx
+
+        logger.info(
+            "[SIMBANK] Table: %d rows, col_date=%s col_detail=%s col_amount=%s headers=%s",
+            len(table), col_date, col_detail, col_amount, header
+        )
  
         if col_date == -1 or col_amount == -1:
             continue

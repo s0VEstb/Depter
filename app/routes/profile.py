@@ -15,6 +15,18 @@ logger = logging.getLogger("depter")
 router = APIRouter()
 
 
+def _parse_json_field(value) -> dict:
+    """Десериализуем JSON из Text-колонки."""
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+    return {}
+
+
 @router.get("/profile/{profile_id}", response_model=ScoringProfileResponse)
 async def get_profile(
     profile_id: int,
@@ -25,27 +37,16 @@ async def get_profile(
     if not profile:
         raise HTTPException(status_code=404, detail="Профиль не найден")
 
-    # Десериализуем JSON-поля из Text-колонок
-    def parse_json_field(value) -> dict:
-        if isinstance(value, dict):
-            return value
-        if isinstance(value, str):
-            try:
-                return json.loads(value)
-            except (json.JSONDecodeError, TypeError):
-                return {}
-        return {}
-
-    income_by_source = parse_json_field(profile.income_by_source)
-    income_by_category = parse_json_field(profile.income_by_category)
-    score_components = parse_json_field(profile.score_components)
+    income_by_source = _parse_json_field(profile.income_by_source)
+    income_by_category = _parse_json_field(profile.income_by_category)
+    score_components = _parse_json_field(profile.score_components)
+    ai_verdict = _parse_json_field(profile.ai_verdict)
 
     # Извлекаем список источников
     sources = list(income_by_source.keys()) if income_by_source else []
 
     # По бизнес-требованию отдаём средний доход в месяц напрямую из БД.
     avg_income_monthly = float(profile.avg_monthly_income_kgs or 0.0)
-    # Сохраняем совместимость контракта API: старые поля дублируют monthly value.
     avg_income_3m = avg_income_monthly
     avg_income_6m = avg_income_monthly
 
@@ -66,5 +67,15 @@ async def get_profile(
         income_by_category=income_by_category,
         fraud_risk_score=profile.fraud_risk_score or 0,
         score_components=score_components,
+        # Новые финансовые метрики
+        total_income=profile.total_income,
+        total_expense=profile.total_expense,
+        avg_expense_monthly=profile.avg_expense_monthly,
+        expense_to_income_ratio=profile.expense_to_income_ratio,
+        net_cashflow_monthly=profile.net_cashflow_monthly,
+        overdraft_count=profile.overdraft_count,
+        max_overdraft_amount=profile.max_overdraft_amount,
+        income_anomaly_detected=profile.income_anomaly_detected,
+        ai_verdict=ai_verdict if ai_verdict else None,
         calculated_at=profile.calculated_at or datetime.utcnow(),
     )

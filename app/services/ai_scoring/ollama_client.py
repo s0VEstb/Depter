@@ -18,6 +18,7 @@ def _post_generate(
     timeout: float,
     url: str,
     options: Optional[dict[str, Any]] = None,
+    response_format: Optional[str] = None,
 ) -> dict[str, Any] | None:
     payload: dict[str, Any] = {
         "model": model,
@@ -26,6 +27,8 @@ def _post_generate(
     }
     if options:
         payload["options"] = options
+    if response_format:
+        payload["format"] = response_format
 
     body = json.dumps(payload).encode("utf-8")
     req = request.Request(
@@ -63,6 +66,7 @@ async def ask(
     timeout: float = 30.0,
     url: str = DEFAULT_OLLAMA_URL,
     options: Optional[dict[str, Any]] = None,
+    response_format: Optional[str] = None,
 ) -> dict[str, Any] | None:
     return await asyncio.to_thread(
         _post_generate,
@@ -71,4 +75,5 @@ async def ask(
         timeout=timeout,
         url=url,
         options=options,
+        response_format=response_format,
     )

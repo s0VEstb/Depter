@@ -83,6 +83,16 @@ def _build_profile_payload(user_id: int, metrics: dict) -> dict:
         "recommended_limit": recommended_limit,
         "fraud_risk_score": int(metrics.get("fraud_risk_score", 0)),
         "score_components": metrics.get("score_components", {}),
+        # Новые финансовые метрики
+        "total_income": metrics.get("total_income"),
+        "total_expense": metrics.get("total_expense"),
+        "avg_expense_monthly": metrics.get("avg_expense_monthly"),
+        "expense_to_income_ratio": metrics.get("expense_to_income_ratio"),
+        "net_cashflow_monthly": metrics.get("net_cashflow_monthly"),
+        "overdraft_count": metrics.get("overdraft_count"),
+        "max_overdraft_amount": metrics.get("max_overdraft_amount"),
+        "income_anomaly_detected": metrics.get("income_anomaly_detected"),
+        "ai_verdict": metrics.get("ai_verdict"),
     }
 
 

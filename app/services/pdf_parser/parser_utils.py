@@ -120,15 +120,23 @@ def detect_bank(pdf_bytes: bytes) -> str:
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         first_page_text = pdf.pages[0].extract_text() or ""
  
+    # Отладка: логируем начало текста первой страницы для диагностики
+    logger.info("detect_bank first_page text (500 chars): %s", first_page_text[:500])
+
     text = first_page_text.lower()
  
-    # Проверяем более специфичные шаблоны раньше более общих, чтобы "simbank"
-    # не попадал под подстроку "mbank".
-    if "simbank" in text or "дос-кредобанк" in text or "dos-credobank" in text:
+    # SimBank: проверяем много паттернов, т.к. реальные PDF могут не содержать слово "simbank"
+    if (
+        "simbank" in text
+        or "дос-кредобанк" in text
+        or "dos-credobank" in text
+        or ("выписка по карте" in text and "имя клиента" in text)
+        or ("номер карты клиента" in text)
+        or ("остаток на начало периода" in text and "остаток на конец периода" in text)
+    ):
         return "simbank"
     if (
         "demirbank" in text
-        or "деmir" in text
         or "дкиб" in text
         or "демир" in text
         or "внешний номер счета" in text
