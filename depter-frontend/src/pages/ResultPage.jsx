@@ -8,14 +8,40 @@ import LineChart from '../components/LineChart';
 /**
  * ResultPage — страница результатов скоринга
  * GET /api/profile/{profile_id}
- * Секции: Score Gauge, Метрики, Источники, Динамика, Детали
+ * Ряд 1: Score + Метрики | Ряд 2: AI Вердикт | Ряд 3: Графики | Ряд 4: Детали | Ряд 5: Кнопки
  */
 
-// Форматирование числа с пробелами
 const formatMoney = (n) => {
     if (n == null) return '—';
     return Math.round(n).toLocaleString('ru-RU');
 };
+
+const SCORE_TOOLTIPS = {
+    'Stability Score': 'Показатель стабильности дохода. Высокий — доходы поступают регулярно, без резких провалов.',
+    'Trend Score': 'Тренд изменения дохода за период. Положительный — доходы растут, отрицательный — снижаются.',
+    'Fraud Penalty': 'Штрафные баллы за подозрительные паттерны: ночные переводы, круглые суммы, несовпадения.',
+    'Период данных': 'Количество месяцев, за которые проанализированы финансовые данные.',
+    'Источников': 'Количество банковских источников (выписок), из которых собраны данные.',
+    'Расходы / Доходы': 'Соотношение расходов к доходам. Чем ниже — тем лучше для кредитоспособности.',
+    'Категории': 'Разбивка доходов по категориям операций (переводы, наличные, QR и т.д.).',
+};
+
+function DetailWithTooltip({ label, tooltip, children }) {
+    return (
+        <div className="glass-card score-detail-item has-tooltip">
+            <div className="score-detail-label">
+                {label}
+                {tooltip && (
+                    <>
+                        <span className="tooltip-icon">ⓘ</span>
+                        <div className="tooltip-bubble">{tooltip}</div>
+                    </>
+                )}
+            </div>
+            {children}
+        </div>
+    );
+}
 
 export default function ResultPage() {
     const { profileId } = useParams();
@@ -132,175 +158,81 @@ export default function ResultPage() {
     return (
         <div className="page">
             <div className="container result-page">
-                {/* ═══════ Секция 1 — Defter Score ═══════ */}
+                {/* ═══════ Ряд 1 — Score + Метрики ═══════ */}
                 <section className="result-section animate-fade-in-up" style={{ opacity: 0 }}>
-                    <div className="glass-card score-hero">
-                        <div className="score-gauge-wrapper">
-                            <GaugeChart score={defter_score} size={260} />
-                            <span className="score-label">Кредитный рейтинг</span>
-                        </div>
-
-                        <div className="score-limit-card glass-card" style={{ borderColor: 'rgba(255, 214, 0, 0.3)' }}>
-                            <div className="score-limit-value gradient-text">
-                                {formatMoney(recommended_limit)} KGS
+                    <div className="score-metrics-row">
+                        {/* Левая часть — Gauge + Лимит */}
+                        <div className="glass-card score-left">
+                            <div className="score-gauge-wrapper">
+                                <GaugeChart score={defter_score} size={220} />
+                                <span className="score-label">Кредитный рейтинг</span>
                             </div>
-                            <div className="score-limit-label">Рекомендованный лимит</div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ═══════ Секция 2 — Ключевые метрики ═══════ */}
-                <section className="result-section animate-fade-in-up delay-1" style={{ opacity: 0 }}>
-                    <h3 className="result-section-title">📋 Ключевые метрики</h3>
-                    <div className="metrics-grid">
-                        {/* Средний доход */}
-                        <div className="glass-card metric-card">
-                            <span className="metric-icon">💰</span>
-                            <div className="metric-value">{formatMoney(avg_income_monthly)}</div>
-                            <div className="metric-label">Средний доход / мес (KGS)</div>
-                        </div>
-
-                        {/* Тренд */}
-                        <div className="glass-card metric-card">
-                            <span className="metric-icon">📈</span>
-                            <div className="metric-value" style={{ color: trendColor }}>
-                                {trendArrow} {trendPercent}
-                            </div>
-                            <div className="metric-label">Тренд дохода</div>
-                        </div>
-
-                        {/* Стабильность */}
-                        <div className="glass-card metric-card">
-                            <span className="metric-icon">🔒</span>
-                            <div className="metric-value">
-                                {stabilityPercent}%
-                                <span
-                                    className="badge"
-                                    style={{
-                                        marginLeft: '8px',
-                                        fontSize: '0.6rem',
-                                        background: `${stabilityColor}20`,
-                                        color: stabilityColor,
-                                    }}
-                                >
-                                    {stabilityPercent >= 80 ? 'Высокая' : stabilityPercent >= 60 ? 'Средняя' : 'Низкая'}
-                                </span>
-                            </div>
-                            <div className="metric-label">Стабильность</div>
-                        </div>
-
-                        {/* Риск фрода */}
-                        <div className="glass-card metric-card">
-                            <span className="metric-icon">⚠️</span>
-                            <div className="metric-value" style={{ color: fraudColor }}>
-                                {fraud_risk_score}
-                                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>/100</span>
-                            </div>
-                            <div className="metric-label">Риск фрода</div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ═══════ Секция 3 — Источники дохода ═══════ */}
-                <section className="result-section animate-fade-in-up delay-2" style={{ opacity: 0 }}>
-                    <h3 className="result-section-title">🏦 Источники дохода</h3>
-                    <div className="glass-card chart-container">
-                        <BarChart data={income_by_source || {}} width={500} height={280} />
-                        <div className="sources-list">
-                            {(sources || []).map((src) => (
-                                <span key={src} className="badge badge-cyan">{src}</span>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* ═══════ Секция 4 — Динамика доходов ═══════ */}
-                <section className="result-section animate-fade-in-up delay-3" style={{ opacity: 0 }}>
-                    <h3 className="result-section-title">📉 Динамика доходов по месяцам</h3>
-                    <div className="glass-card chart-container">
-                        <LineChart
-                            data={score_components?.monthly_income || {}}
-                            width={600}
-                            height={300}
-                        />
-                    </div>
-                </section>
-
-                {/* ═══════ Секция 5 — Детали скоринга ═══════ */}
-                <section className="result-section animate-fade-in-up delay-4" style={{ opacity: 0 }}>
-                    <h3 className="result-section-title">🔍 Детали скоринга</h3>
-                    <div className="score-details-grid">
-                        <div className="glass-card score-detail-item">
-                            <div className="score-detail-label">Stability Score</div>
-                            <div className="score-detail-value gradient-text">
-                                {score_components?.stability_score ?? Math.round(stability * 350)}
-                            </div>
-                        </div>
-                        <div className="glass-card score-detail-item">
-                            <div className="score-detail-label">Trend Score</div>
-                            <div className="score-detail-value gradient-text">
-                                {score_components?.trend_score ?? (income_trend * 100).toFixed(1)}
-                            </div>
-                        </div>
-                        <div className="glass-card score-detail-item">
-                            <div className="score-detail-label">Fraud Penalty</div>
-                            <div className="score-detail-value" style={{ color: fraudColor }}>
-                                {score_components?.fraud_penalty ?? fraud_risk_score ?? 0}
-                            </div>
-                        </div>
-                        <div className="glass-card score-detail-item">
-                            <div className="score-detail-label">Период данных</div>
-                            <div className="score-detail-value gradient-text">
-                                {data_period_months ?? '—'} мес.
-                            </div>
-                        </div>
-                        <div className="glass-card score-detail-item">
-                            <div className="score-detail-label">Источников</div>
-                            <div className="score-detail-value gradient-text">
-                                {sources_count ?? '—'}
-                            </div>
-                        </div>
-                        {expense_to_income_ratio != null && (
-                            <div className="glass-card score-detail-item">
-                                <div className="score-detail-label">Расходы / Доходы</div>
-                                <div className="score-detail-value" style={{
-                                    color: expense_to_income_ratio > 1
-                                        ? 'var(--color-error)'
-                                        : expense_to_income_ratio > 0.85
-                                            ? 'var(--color-warning)'
-                                            : 'var(--color-success)',
-                                }}>
-                                    {(expense_to_income_ratio * 100).toFixed(0)}%
+                            <div className="score-limit-inline">
+                                <div className="score-limit-value gradient-text">
+                                    {formatMoney(recommended_limit)} KGS
                                 </div>
+                                <div className="score-limit-label">Рекомендованный лимит</div>
                             </div>
-                        )}
-                        {income_by_category && (
-                            <div className="glass-card score-detail-item">
-                                <div className="score-detail-label">Категории</div>
-                                <div style={{ marginTop: '8px' }}>
-                                    {Object.entries(income_by_category).map(([cat, val]) => (
-                                        <div
-                                            key={cat}
+                        </div>
+                        {/* Правая часть — 4 метрики */}
+                        <div className="metrics-side">
+                            <h3 className="result-section-title" style={{ marginBottom: '16px' }}>
+                                📋 Ключевые метрики
+                            </h3>
+                            <div className="metrics-grid-2x2">
+                                {/* Средний доход */}
+                                <div className="glass-card metric-card">
+                                    <span className="metric-icon">💰</span>
+                                    <div className="metric-value">{formatMoney(avg_income_monthly)}</div>
+                                    <div className="metric-label">Средний доход / мес (KGS)</div>
+                                </div>
+
+                                {/* Тренд */}
+                                <div className="glass-card metric-card">
+                                    <span className="metric-icon">📈</span>
+                                    <div className="metric-value" style={{ color: trendColor }}>
+                                        {trendArrow} {trendPercent}
+                                    </div>
+                                    <div className="metric-label">Тренд дохода</div>
+                                </div>
+
+                                {/* Стабильность */}
+                                <div className="glass-card metric-card">
+                                    <span className="metric-icon">🔒</span>
+                                    <div className="metric-value">
+                                        {stabilityPercent}%
+                                        <span
+                                            className="badge"
                                             style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                fontSize: '0.85rem',
-                                                marginBottom: '4px',
+                                                marginLeft: '8px',
+                                                fontSize: '0.6rem',
+                                                background: `${stabilityColor}20`,
+                                                color: stabilityColor,
                                             }}
                                         >
-                                            <span style={{ color: 'var(--color-text-secondary)' }}>{cat}</span>
-                                            <span style={{ fontWeight: 600 }}>{formatMoney(val)}</span>
-                                        </div>
-                                    ))}
+                                            {stabilityPercent >= 80 ? 'Высокая' : stabilityPercent >= 60 ? 'Средняя' : 'Низкая'}
+                                        </span>
+                                    </div>
+                                    <div className="metric-label">Стабильность</div>
+                                </div>
+
+                                {/* Риск фрода */}
+                                <div className="glass-card metric-card">
+                                    <span className="metric-icon">⚠️</span>
+                                    <div className="metric-value" style={{ color: fraudColor }}>
+                                        {fraud_risk_score}
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>/100</span>
+                                    </div>
+                                    <div className="metric-label">Риск фрода</div>
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </section>
 
-                {/* ═══════ Секция 6 — AI Verdict ═══════ */}
+                {/* ═══════ Ряд 2 — AI Verdict ═══════ */}
                 {ai_verdict && (
-                    <section className="result-section animate-fade-in-up delay-5" style={{ opacity: 0 }}>
+                    <section className="result-section animate-fade-in-up delay-1" style={{ opacity: 0 }}>
                         <h3 className="result-section-title">🤖 AI Вердикт</h3>
                         <div className="glass-card" style={{ padding: '28px' }}>
                             {/* Решение + Уровень риска */}
@@ -425,8 +357,96 @@ export default function ResultPage() {
                     </section>
                 )}
 
-                {/* ═══════ Кнопки действий ═══════ */}
-                <div className="action-buttons animate-fade-in-up delay-5" style={{ opacity: 0 }}>
+                {/* ═══════ Ряд 3 — Графики бок о бок ═══════ */}
+                <section className="result-section animate-fade-in-up delay-2" style={{ opacity: 0 }}>
+                    <div className="charts-row">
+                        <div className="glass-card chart-half">
+                            <h4 className="chart-title">🏦 Источники дохода</h4>
+                            <BarChart data={income_by_source || {}} width={420} height={250} />
+                            <div className="sources-list">
+                                {(sources || []).map((src) => (
+                                    <span key={src} className="badge badge-cyan">{src}</span>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="glass-card chart-half">
+                            <h4 className="chart-title">📉 Динамика доходов по месяцам</h4>
+                            <LineChart
+                                data={score_components?.monthly_income || {}}
+                                width={420}
+                                height={250}
+                            />
+                        </div>
+                    </div>
+                </section>
+
+                {/* ═══════ Ряд 4 — Детали скоринга (с tooltips) ═══════ */}
+                <section className="result-section animate-fade-in-up delay-3" style={{ opacity: 0 }}>
+                    <h3 className="result-section-title">🔍 Детали скоринга</h3>
+                    <div className="score-details-grid">
+                        <DetailWithTooltip label="Stability Score" tooltip={SCORE_TOOLTIPS['Stability Score']}>
+                            <div className="score-detail-value gradient-text">
+                                {score_components?.stability_score ?? Math.round(stability * 350)}
+                            </div>
+                        </DetailWithTooltip>
+                        <DetailWithTooltip label="Trend Score" tooltip={SCORE_TOOLTIPS['Trend Score']}>
+                            <div className="score-detail-value gradient-text">
+                                {score_components?.trend_score ?? (income_trend * 100).toFixed(1)}
+                            </div>
+                        </DetailWithTooltip>
+                        <DetailWithTooltip label="Fraud Penalty" tooltip={SCORE_TOOLTIPS['Fraud Penalty']}>
+                            <div className="score-detail-value" style={{ color: fraudColor }}>
+                                {score_components?.fraud_penalty ?? fraud_risk_score ?? 0}
+                            </div>
+                        </DetailWithTooltip>
+                        <DetailWithTooltip label="Период данных" tooltip={SCORE_TOOLTIPS['Период данных']}>
+                            <div className="score-detail-value gradient-text">
+                                {data_period_months ?? '—'} мес.
+                            </div>
+                        </DetailWithTooltip>
+                        <DetailWithTooltip label="Источников" tooltip={SCORE_TOOLTIPS['Источников']}>
+                            <div className="score-detail-value gradient-text">
+                                {sources_count ?? '—'}
+                            </div>
+                        </DetailWithTooltip>
+                        {expense_to_income_ratio != null && (
+                            <DetailWithTooltip label="Расходы / Доходы" tooltip={SCORE_TOOLTIPS['Расходы / Доходы']}>
+                                <div className="score-detail-value" style={{
+                                    color: expense_to_income_ratio > 1
+                                        ? 'var(--color-error)'
+                                        : expense_to_income_ratio > 0.85
+                                            ? 'var(--color-warning)'
+                                            : 'var(--color-success)',
+                                }}>
+                                    {(expense_to_income_ratio * 100).toFixed(0)}%
+                                </div>
+                            </DetailWithTooltip>
+                        )}
+                        {income_by_category && (
+                            <DetailWithTooltip label="Категории" tooltip={SCORE_TOOLTIPS['Категории']}>
+                                <div style={{ marginTop: '8px' }}>
+                                    {Object.entries(income_by_category).map(([cat, val]) => (
+                                        <div
+                                            key={cat}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                fontSize: '0.85rem',
+                                                marginBottom: '4px',
+                                            }}
+                                        >
+                                            <span style={{ color: 'var(--color-text-secondary)' }}>{cat}</span>
+                                            <span style={{ fontWeight: 600 }}>{formatMoney(val)}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </DetailWithTooltip>
+                        )}
+                    </div>
+                </section>
+
+                {/* ═══════ Ряд 5 — Кнопки действий ═══════ */}
+                <div className="action-buttons animate-fade-in-up delay-4" style={{ opacity: 0 }}>
                     <button className="btn btn-secondary" onClick={() => window.print()}>
                         📥 Скачать PDF-отчёт
                     </button>

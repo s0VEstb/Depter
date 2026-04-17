@@ -34,8 +34,8 @@ export default function Navbar() {
                         Главная
                     </Link>
                     <Link
-                        to="/register"
-                        className={`navbar-link ${isActive('/register') ? 'active' : ''}`}
+                        to={user ? '/upload' : '/register'}
+                        className={`navbar-link ${isActive('/register') || isActive('/upload') ? 'active' : ''}`}
                     >
                         Новый скоринг
                     </Link>

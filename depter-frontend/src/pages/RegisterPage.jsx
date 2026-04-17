@@ -43,6 +43,8 @@ export default function RegisterPage() {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Обновление поля формы
     const handleChange = (e) => {
@@ -68,7 +70,7 @@ export default function RegisterPage() {
         if (!form.password || form.password.length < 6) errs.password = 'Минимум 6 символов';
         if (form.password !== form.confirm_password) errs.confirm_password = 'Пароли не совпадают';
         if (!form.inn.match(/^\d{14}$/)) errs.inn = 'ИНН должен содержать 14 цифр';
-        if (!form.passport_id.match(/^[A-Z]{2}\d{7}$/)) errs.passport_id = 'Формат: AN1234567';
+        if (!form.passport_id.match(/^[A-Z]{2}\d{7}$/)) errs.passport_id = 'Формат: ID1234567';
         if (!form.birth_date) errs.birth_date = 'Укажите дату рождения';
         if (!form.consent) errs.consent = 'Необходимо дать согласие';
 
@@ -184,26 +186,96 @@ export default function RegisterPage() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <div className="form-group">
                                 <label className="form-label">Пароль * (мин. 6 символов)</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    className={`form-input ${errors.password ? 'error' : ''}`}
-                                    placeholder="••••••••"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                />
+                                <div style={{ position: 'relative', width: '100%' }}>
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        name="password"
+                                        className={`form-input ${errors.password ? 'error' : ''}`}
+                                        placeholder="••••••••"
+                                        value={form.password}
+                                        onChange={handleChange}
+                                        style={{ width: '100%', paddingRight: '40px', boxSizing: 'border-box' }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}
+                                        tabIndex={-1}
+                                        title={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                                    >
+                                        {showPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                                                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                                                <line x1="1" y1="1" x2="23" y2="23" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
                                 <span className="form-error">{errors.password || ''}</span>
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Повторите пароль *</label>
-                                <input
-                                    type="password"
-                                    name="confirm_password"
-                                    className={`form-input ${errors.confirm_password ? 'error' : ''}`}
-                                    placeholder="••••••••"
-                                    value={form.confirm_password}
-                                    onChange={handleChange}
-                                />
+                                <div style={{ position: 'relative', width: '100%' }}>
+                                    <input
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        name="confirm_password"
+                                        className={`form-input ${errors.confirm_password ? 'error' : ''}`}
+                                        placeholder="••••••••"
+                                        value={form.confirm_password}
+                                        onChange={handleChange}
+                                        style={{ width: '100%', paddingRight: '40px', boxSizing: 'border-box' }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}
+                                        tabIndex={-1}
+                                        title={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                                                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                                                <line x1="1" y1="1" x2="23" y2="23" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
                                 <span className="form-error">{errors.confirm_password || ''}</span>
                             </div>
                         </div>
@@ -229,7 +301,7 @@ export default function RegisterPage() {
                                     type="text"
                                     name="passport_id"
                                     className={`form-input ${errors.passport_id ? 'error' : ''}`}
-                                    placeholder="AN1234567"
+                                    placeholder="ID1234567"
                                     maxLength={9}
                                     value={form.passport_id}
                                     onChange={handleChange}
