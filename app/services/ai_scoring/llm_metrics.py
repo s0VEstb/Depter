@@ -6,7 +6,8 @@ from collections import defaultdict
 from datetime import datetime
 from statistics import mean, pstdev
 from typing import Any
-from app.services.ai_scoring.ollama_client import ask as ollama_ask
+
+from app.services.ai_scoring.llm_client import ask as llm_ask
 from .math_metrics import (
     _month_key,
     _safe_float,
@@ -168,8 +169,7 @@ async def ask_llm_for_scoring(transactions: list[Any], fallback_metrics: dict[st
     for attempt in range(1, max_retries + 1):
         logger.info("LLM attempt %d/%d", attempt, max_retries)
 
-        response = await ollama_ask(
-            model="gemma4:e4b",
+        response = await llm_ask(
             prompt=prompt,
             timeout=180,
             options={"temperature": 0.3, "num_predict": 1024},
